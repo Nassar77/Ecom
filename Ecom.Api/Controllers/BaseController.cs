@@ -5,7 +5,12 @@ using Microsoft.AspNetCore.Mvc;
 namespace Ecom_Api.Controllers;
 [Route("api/[controller]/[action]")]
 [ApiController]
-public class BaseController(IUnitOfWork work) : ControllerBase
+public class BaseController : ControllerBase
 {
-    protected readonly IUnitOfWork _work = work;
+    protected readonly IUnitOfWork work;
+   
+    public BaseController(IUnitOfWork work)
+    {
+        this.work = work;
+    }
 }
