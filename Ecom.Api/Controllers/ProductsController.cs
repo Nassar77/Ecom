@@ -2,7 +2,6 @@
 using Ecom.Core.Interfaces;
 using Ecom_Api.Helper;
 using Mapster;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Ecom_Api.Controllers;
@@ -49,7 +48,22 @@ public class ProductsController : BaseController
         }
         catch (Exception ex)
         {
-            return BadRequest(ex.Message);
+            return BadRequest(new ResponseAPI(400, ex.Message));
+        }
+    }
+    [HttpPost("")]
+   public async Task<IActionResult>Add(AddProductDTO productDto)
+    {
+        try
+        {
+           // var product=productDto.Adapt<Product>();
+            await work.ProductRepositry.AddAsync(productDto);
+            return Ok(new ResponseAPI(200,"Product is added"));
+        }
+        catch (Exception ex)
+        {
+
+            return BadRequest(new ResponseAPI(400, ex.Message));
         }
     }
 }

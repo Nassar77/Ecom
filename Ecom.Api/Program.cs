@@ -2,6 +2,7 @@ using Ecom.infrastructure;
 using Mapster;
 using MapsterMapper;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
 using Scalar.AspNetCore;
 using System.Reflection;
 
