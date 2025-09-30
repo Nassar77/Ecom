@@ -66,4 +66,36 @@ public class ProductsController : BaseController
             return BadRequest(new ResponseAPI(400, ex.Message));
         }
     }
+
+    [HttpPut("")]
+    public async Task<IActionResult>Update(UpdateProductDto updateProductDto)
+    {
+        try
+        {
+            await work.ProductRepositry .UpdateAsync(updateProductDto);
+            return Ok(new ResponseAPI(200, "Product is updated"));
+        }
+        catch (Exception ex)
+        {
+
+            return BadRequest(new ResponseAPI(400, ex.Message));
+        }
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult>Delete(int id)
+    {
+        try
+        {
+            var product=await work.ProductRepositry
+                .GetByIDAsync(id,x=>x.Category,x=>x.Photos);
+            await work.ProductRepositry.DeleteAsync(product);
+            return Ok(new ResponseAPI(200, "Product is deleted"));
+        }
+        catch (Exception ex )
+        {
+
+            return BadRequest(new ResponseAPI(400, ex.Message));
+        }
+    }
 }
