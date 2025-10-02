@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Ecom_Api.Controllers;
-[Route("errors/[statusCode]")]
+[Route("errors/{statusCode}")]
 [ApiController]
 public class ErrorController : ControllerBase
 {

@@ -8,7 +8,7 @@ public class BugController : BaseController
     public BugController(IUnitOfWork work) : base(work)
     {
     }
-    [HttpGet("not-found")]
+    [HttpGet("")]
     public async Task<ActionResult> GetNotFound()
     {
         var category = await work.CategoryRepositry.GetByIDAsync(100);
@@ -16,7 +16,7 @@ public class BugController : BaseController
         return Ok(category);
     }
 
-    [HttpGet("server-error")]
+    [HttpGet("")]
     public async Task<ActionResult> GetServerError()
     {
         var category = await work.CategoryRepositry.GetByIDAsync(100);
@@ -24,13 +24,13 @@ public class BugController : BaseController
         return Ok(category);
     }
 
-    [HttpGet("bad-request/{id}")]
+    [HttpGet("{id}")]
     public async Task<ActionResult> GetBadRequest(int id)
     {
         return Ok();
     }
 
-    [HttpGet("bad-request")]
+    [HttpGet("")]
     public async Task<ActionResult> GetBadRequest()
     {
         return BadRequest();

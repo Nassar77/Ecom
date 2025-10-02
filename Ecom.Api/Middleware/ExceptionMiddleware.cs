@@ -23,46 +23,72 @@ public class ExceptionMiddleware
     {
         try
         {
+            if (!IsRequestAllowed(context))
+            {
+                if (!context.Response.HasStarted)
+                {
+                    context.Response.Clear();
+                    context.Response.StatusCode = (int)HttpStatusCode.TooManyRequests;
+                    context.Response.ContentType = "application/json";
+
+                    var response = new ApiExceptions(
+                        (int)HttpStatusCode.TooManyRequests,
+                        "Too many requests. Please try again later"
+                    );
+
+                    await context.Response.WriteAsJsonAsync(response);
+                }
+
+                return; // ⬅️ مهم جداً عشان مايكملش البايبلاين
+            }
+
             await _Next(context);
         }
         catch (Exception ex)
         {
+            if (!context.Response.HasStarted)
+            {
+                context.Response.Clear();
+                context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                context.Response.ContentType = "application/json";
 
-            context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-            context.Response.ContentType = "application/json";
+                var response = _Environment.IsDevelopment()
+                    ? new ApiExceptions((int)HttpStatusCode.InternalServerError, ex.Message, ex.StackTrace)
+                    : new ApiExceptions((int)HttpStatusCode.InternalServerError, "An error occurred");
 
-            var response = _Environment.IsDevelopment() ?
-                new ApiExceptions((int)HttpStatusCode.InternalServerError, ex.Message, ex.StackTrace)
-                : new ApiExceptions((int)HttpStatusCode.InternalServerError, ex.Message);
-
-            var json = JsonSerializer.Serialize(response);
-            await context.Response.WriteAsync(json);
+                var json = JsonSerializer.Serialize(response);
+                await context.Response.WriteAsync(json);
+            }
         }
     }
     private bool IsRequestAllowed(HttpContext context)
     {
         var ip = context.Connection.RemoteIpAddress.ToString();
-        var cachkey = $"Rate:{ip}";
-        var dateNow = DateTime.Now;
+        var cacheKey = $"Rate:{ip}";
+        var now = DateTime.Now;
 
-        var (timesTamp, count) = _MemoryCache.GetOrCreate(cachkey, entry =>
+        var (timeStamp, count) = _MemoryCache.GetOrCreate(cacheKey, entry =>
         {
             entry.AbsoluteExpirationRelativeToNow = _rateLimitWindow;
-            return (timesTamp: dateNow, count: 0);
+            return (timeStamp: now, count: 0);
         });
 
-        if (dateNow - timesTamp < _rateLimitWindow)
+        if (now - timeStamp < _rateLimitWindow)
         {
-            if (count > 8)
+            if (count > 8) 
             {
                 return false;
             }
-            _MemoryCache.Set(cachkey, (timesTamp, count += 1), _rateLimitWindow);
+            count++;
+            _MemoryCache.Set(cacheKey, (timeStamp, count), _rateLimitWindow);
         }
         else
         {
-            _MemoryCache.Set(cachkey, (timesTamp, count), _rateLimitWindow);
+            
+            _MemoryCache.Set(cacheKey, (now, 1), _rateLimitWindow);
         }
+
         return true;
     }
+
 }
