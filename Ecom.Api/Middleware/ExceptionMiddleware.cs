@@ -23,7 +23,9 @@ public class ExceptionMiddleware
     {
         try
         {
-            if (!IsRequestAllowed(context))
+            ApplySecurity(context);
+    
+                if (!IsRequestAllowed(context))
             {
                 if (!context.Response.HasStarted)
                 {
@@ -89,6 +91,30 @@ public class ExceptionMiddleware
         }
 
         return true;
+    }
+
+    //private void ApplySecurity(HttpContext context)
+    //{
+    //    context.Response.Headers["X-Content-Type-Options"]= "nosniff";
+    //    context.Response.Headers["X-XSS-Protection"]= "1;mode=block";
+    //    context.Response.Headers["X-Frame-Options"]= "DENY";
+    //}
+    private void ApplySecurity(HttpContext context)
+    {
+        var headers = context.Response.Headers;
+
+        headers["X-Content-Type-Options"] = "nosniff";
+
+        headers["X-XSS-Protection"] = "1;mode=block";
+
+        headers["X-Frame-Options"] = "DENY";
+
+        headers["Content-Security-Policy"] =
+            "default-src 'self'; script-src 'self'; style-src 'self'; object-src 'none'; frame-ancestors 'none';";
+
+        headers["Referrer-Policy"] = "no-referrer";
+
+        headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains; preload";
     }
 
 }
