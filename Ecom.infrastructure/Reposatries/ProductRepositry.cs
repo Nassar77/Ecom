@@ -2,6 +2,7 @@
 using Ecom.Core.Entities.Product;
 using Ecom.Core.Interfaces;
 using Ecom.Core.Services;
+using Ecom.Core.Sharing;
 using Ecom.infrastructure.Data;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
@@ -18,6 +19,35 @@ public class ProductRepositry : GenericRepositry<Product>, IProductRepositry
         _ImageManagementService = imageManagementService;
     }
 
+    public async Task<IEnumerable<ProductDTO>> GetAllAsync(ProductParams productParams)
+    {
+        var query = _Context.Products
+            .Include(p => p.Category)
+            .Include(p => p.Photos)
+            .AsNoTracking();
+        //filtering by categoryId
+        if(productParams.CategoryId.HasValue) 
+            query=query.Where(p=>p.Category.Id == productParams.CategoryId);
+
+        if (!string.IsNullOrEmpty(productParams.Sort))
+        {
+            query = productParams.Sort switch
+            {
+                "PriceAce" => query.OrderBy(p => p.NewPrice),
+                "PriceDce" => query.OrderByDescending(p => p.NewPrice),
+                _ => query.OrderBy(p => p.Name),
+            };
+        }
+
+     
+
+        query = query.Skip((productParams.PageSize) * (productParams.PageNumber - 1)).Take(productParams.PageSize);
+
+        var result=query.Adapt<List<ProductDTO>>();
+
+        return result;
+
+    }
     public async Task<bool> AddAsync(AddProductDTO productDTO)
     {
         if (productDTO is null) return false;

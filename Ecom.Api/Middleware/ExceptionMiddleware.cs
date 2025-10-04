@@ -24,8 +24,8 @@ public class ExceptionMiddleware
         try
         {
             ApplySecurity(context);
-    
-                if (!IsRequestAllowed(context))
+
+            if (!IsRequestAllowed(context))
             {
                 if (!context.Response.HasStarted)
                 {
@@ -77,7 +77,7 @@ public class ExceptionMiddleware
 
         if (now - timeStamp < _rateLimitWindow)
         {
-            if (count > 8) 
+            if (count > 8)
             {
                 return false;
             }
@@ -86,7 +86,7 @@ public class ExceptionMiddleware
         }
         else
         {
-            
+
             _MemoryCache.Set(cacheKey, (now, 1), _rateLimitWindow);
         }
 
@@ -101,6 +101,7 @@ public class ExceptionMiddleware
     //}
     private void ApplySecurity(HttpContext context)
     {
+        var path = context.Request.Path.Value?.ToLower();
         var headers = context.Response.Headers;
 
         headers["X-Content-Type-Options"] = "nosniff";
@@ -109,8 +110,11 @@ public class ExceptionMiddleware
 
         headers["X-Frame-Options"] = "DENY";
 
-        headers["Content-Security-Policy"] =
-            "default-src 'self'; script-src 'self'; style-src 'self'; object-src 'none'; frame-ancestors 'none';";
+        if (path is null || (!path.Contains("swagger") && !path.Contains("scalar")))
+        {
+            headers["Content-Security-Policy"] =
+                "default-src 'self'; script-src 'self'; style-src 'self'; object-src 'none'; frame-ancestors 'none';";
+        }
 
         headers["Referrer-Policy"] = "no-referrer";
 

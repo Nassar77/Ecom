@@ -1,5 +1,6 @@
 ﻿using Ecom.Core.DTO;
 using Ecom.Core.Interfaces;
+using Ecom.Core.Sharing;
 using Ecom_Api.Helper;
 using Mapster;
 using Microsoft.AspNetCore.Mvc;
@@ -11,19 +12,19 @@ public class ProductsController : BaseController
     {
     }
     [HttpGet("")]
-    public async Task<IActionResult> GetAll()
+    public async Task<IActionResult> GetAll([FromQuery]ProductParams productParams)
     {
         try
         {
             var products = await work.ProductRepositry
-                .GetAllAsync(x => x.Category, x => x.Photos);
+                .GetAllAsync(productParams);
 
             if (products is null)
                 return BadRequest(new ResponseAPI(400));
 
-            var result = products.Adapt<List<ProductDTO>>();
+           
 
-            return Ok(result);
+            return Ok(products);
 
         }
         catch (Exception ex)
