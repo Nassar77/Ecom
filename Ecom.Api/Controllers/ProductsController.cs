@@ -16,15 +16,18 @@ public class ProductsController : BaseController
     {
         try
         {
+
             var products = await work.ProductRepositry
                 .GetAllAsync(productParams);
+
 
             if (products is null)
                 return BadRequest(new ResponseAPI(400));
 
+            var totalCount=await work.ProductRepositry.CountAsync();
            
 
-            return Ok(products);
+            return Ok(new Pagination<ProductDTO>(productParams.PageNumber,productParams.PageSize,totalCount,products));
 
         }
         catch (Exception ex)

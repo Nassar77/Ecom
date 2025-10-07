@@ -13,7 +13,7 @@ public class ProductRepositry : GenericRepositry<Product>, IProductRepositry
     private readonly AppDbContext _Context;
     private readonly IImageManagementService _ImageManagementService;
 
-    public ProductRepositry(AppDbContext context,IImageManagementService imageManagementService) : base(context)
+    public ProductRepositry(AppDbContext context, IImageManagementService imageManagementService) : base(context)
     {
         _Context = context;
         _ImageManagementService = imageManagementService;
@@ -25,9 +25,20 @@ public class ProductRepositry : GenericRepositry<Product>, IProductRepositry
             .Include(p => p.Category)
             .Include(p => p.Photos)
             .AsNoTracking();
+        //filtring by word
+        if (!string.IsNullOrEmpty(productParams.Search))
+        {
+            var searchWords=productParams.Search.Split(' ');
+            query = query
+                .Where(x => searchWords.All(word=>
+                x.Name.ToLower().Contains(word.ToLower())||
+                x.Description.ToLower().Contains(word.ToLower())
+                ));
+        }
+
         //filtering by categoryId
-        if(productParams.CategoryId.HasValue) 
-            query=query.Where(p=>p.Category.Id == productParams.CategoryId);
+        if (productParams.CategoryId.HasValue)
+            query = query.Where(p => p.Category.Id == productParams.CategoryId);
 
         if (!string.IsNullOrEmpty(productParams.Sort))
         {
@@ -39,11 +50,11 @@ public class ProductRepositry : GenericRepositry<Product>, IProductRepositry
             };
         }
 
-     
+
 
         query = query.Skip((productParams.PageSize) * (productParams.PageNumber - 1)).Take(productParams.PageSize);
 
-        var result=query.Adapt<List<ProductDTO>>();
+        var result = query.Adapt<List<ProductDTO>>();
 
         return result;
 
@@ -62,7 +73,7 @@ public class ProductRepositry : GenericRepositry<Product>, IProductRepositry
         var photo = imagePath.Select(path => new Photo
         {
             ImageName = path,
-            ProductId=product.Id,
+            ProductId = product.Id,
 
         }).ToList();
 
@@ -73,17 +84,17 @@ public class ProductRepositry : GenericRepositry<Product>, IProductRepositry
     }
     public async Task<bool> UpdateAsync(UpdateProductDto updateProductDto)
     {
-        if(updateProductDto is null) return false;
+        if (updateProductDto is null) return false;
 
-        var findProduct= await _Context.Products.Include(m=>m.Category)
-            .Include(m=>m.Photos)
-            .FirstOrDefaultAsync(m=>m.Id==updateProductDto.Id);
+        var findProduct = await _Context.Products.Include(m => m.Category)
+            .Include(m => m.Photos)
+            .FirstOrDefaultAsync(m => m.Id == updateProductDto.Id);
 
         if (findProduct is null) return false;
 
         findProduct = updateProductDto.Adapt(findProduct);
 
-        var findPhoto =await _Context.Photos.Where(m=>m.ProductId==updateProductDto.Id).ToListAsync();
+        var findPhoto = await _Context.Photos.Where(m => m.ProductId == updateProductDto.Id).ToListAsync();
 
         foreach (var item in findPhoto)
         {
@@ -107,12 +118,12 @@ public class ProductRepositry : GenericRepositry<Product>, IProductRepositry
     }
     public async Task DeleteAsync(Product product)
     {
-        var photos=await _Context.Photos.Where(x=>x.ProductId==product.Id).ToListAsync();
+        var photos = await _Context.Photos.Where(x => x.ProductId == product.Id).ToListAsync();
         foreach (var item in photos)
         {
             _ImageManagementService.DeleteImageAsync(item.ImageName);
         }
-         _Context.Products.Remove(product);
+        _Context.Products.Remove(product);
         await _Context.SaveChangesAsync();
     }
 

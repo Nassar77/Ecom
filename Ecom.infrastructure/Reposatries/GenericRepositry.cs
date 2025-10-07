@@ -19,6 +19,8 @@ public class GenericRepositry<T>(AppDbContext context) : IGenericRepositry<T> wh
         await _context.SaveChangesAsync();
     }
 
+    public async Task<int> CountAsync()
+        =>await _context.Set<T>().CountAsync();
     public async Task DeleteAsync(int id)
     {
         var entity = await _context.Set<T>().FindAsync(id);
