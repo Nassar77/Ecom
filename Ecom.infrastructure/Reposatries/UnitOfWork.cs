@@ -14,6 +14,8 @@ public class UnitOfWork : IUnitOfWork
 
     public IProductRepositry ProductRepositry { get; }
 
+    public ICustomerBasketRepositry CustomerBasket {  get; }
+
     public UnitOfWork(AppDbContext context,IImageManagementService imageManagementService)
     {
         _Context = context;
@@ -21,5 +23,6 @@ public class UnitOfWork : IUnitOfWork
         CategoryRepositry =new CategoryRepositry(_Context);
         PhotoRepositry = new PhotoRepositry(_Context);
         ProductRepositry = new ProductRepositry(_Context, _ImageManagementService);
+        CustomerBasket = new CustomerBasketRepositry();
     }
 }
