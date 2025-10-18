@@ -2,7 +2,7 @@
 using Ecom.Core.Services;
 using Ecom.infrastructure.Data;
 using Ecom.infrastructure.Reposatries;
-using Ecom.infrastructure.Service;
+using Ecom.infrastructure.Reposatries.Service;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,13 +17,16 @@ public static class infrastructureRegisteration
     {
         services.AddScoped(typeof(IGenericRepositry<>), typeof(GenericRepositry<>));
 
-
+        //Apply unit of work
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+        //for register email sender
+        services.AddScoped<IEmailService, EmailService>();
+        //for imageservice
         services.AddScoped<IImageManagementService, ImageManagementService>();
         services.AddSingleton<IFileProvider>(
           new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot"))
           );
-        //apply redis 
+        //apply redis connection
         services.AddSingleton<IConnectionMultiplexer>(i =>
         {
             var config = ConfigurationOptions.Parse(configuration.GetConnectionString("redis"));

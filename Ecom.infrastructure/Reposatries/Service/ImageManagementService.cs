@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.FileProviders;
 
-namespace Ecom.infrastructure.Service;
+namespace Ecom.infrastructure.Reposatries.Service;
 public class ImageManagementService : IImageManagementService
 {
     private readonly IFileProvider fileProvider;

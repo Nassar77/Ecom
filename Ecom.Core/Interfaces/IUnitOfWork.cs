@@ -5,4 +5,5 @@ public interface IUnitOfWork
     public IPhotoRepositry  PhotoRepositry { get; }
     public IProductRepositry  ProductRepositry { get; }
     public ICustomerBasketRepositry CustomerBasket { get; }
+    public IAuth Auth { get; }
 }
