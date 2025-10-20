@@ -14,6 +14,7 @@ public class UnitOfWork : IUnitOfWork
     private readonly UserManager<AppUser> _UserManager;
     private readonly IEmailService _EmailService;
     private readonly SignInManager<AppUser> _SignINManager;
+    private readonly IGenerateToken _Token;
 
     public ICategoryRepositry CategoryRepositry { get;  }
 
@@ -25,7 +26,7 @@ public class UnitOfWork : IUnitOfWork
 
     public IAuth Auth { get; }
 
-    public UnitOfWork(AppDbContext context, IImageManagementService imageManagementService, IConnectionMultiplexer redis, UserManager<AppUser> userManager, IEmailService emailService, SignInManager<AppUser> signINManager)
+    public UnitOfWork(AppDbContext context, IImageManagementService imageManagementService, IConnectionMultiplexer redis, UserManager<AppUser> userManager, IEmailService emailService, SignInManager<AppUser> signINManager, IGenerateToken token)
     {
         _Context = context;
         _ImageManagementService = imageManagementService;
@@ -33,10 +34,11 @@ public class UnitOfWork : IUnitOfWork
         _UserManager = userManager;
         _EmailService = emailService;
         _SignINManager = signINManager;
+        _Token = token;
         CategoryRepositry = new CategoryRepositry(_Context);
         PhotoRepositry = new PhotoRepositry(_Context);
         ProductRepositry = new ProductRepositry(_Context, _ImageManagementService);
         CustomerBasket = new CustomerBasketRepositry(_Redis);
-        Auth = new AuthRepositry(userManager, emailService, signINManager);
+        Auth = new AuthRepositry(userManager, signINManager, emailService,token);
     }
 }
