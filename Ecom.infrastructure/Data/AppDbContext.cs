@@ -1,4 +1,5 @@
 ﻿using Ecom.Core.Entities;
+using Ecom.Core.Entities.Order;
 using Ecom.Core.Entities.Product;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -15,6 +16,9 @@ public class AppDbContext : IdentityDbContext<AppUser>
     public virtual DbSet<Product> Products { get; set; }
     public virtual DbSet<Photo> Photos { get; set; }
     public virtual DbSet<Address> Address { get; set; }
+    public virtual DbSet<Orders> Orders { get; set; }
+    public virtual DbSet<OrderItem> OrderItems   { get; set; }
+    public virtual DbSet<DeliveryMethod>DeliveryMethods  { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
